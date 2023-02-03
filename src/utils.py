@@ -4,11 +4,15 @@ import numpy as np
 import datetime
 from pathlib import Path  
 
+
 def data_loader():
-    X_train = pd.read_csv("./data/dengue_features_train.csv")
-    X_test = pd.read_csv("./data/dengue_features_test.csv")
-    y_train = pd.read_csv("./data/dengue_labels_train.csv")
-    return X_train, X_test, y_train
+    df_features = pd.read_csv("./data/dengue_features_train.csv")
+    df_test = pd.read_csv("./data/dengue_features_test.csv")
+    df_label = pd.read_csv("./data/dengue_labels_train.csv")
+    df_train = pd.concat([df_features, df_label.loc[:,'total_cases']], axis=1)
+    return df_train, df_test
+
+
 
 
 def get_data_into_submission_format(prediction: np.array) -> None:

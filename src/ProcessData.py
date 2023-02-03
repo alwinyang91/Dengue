@@ -2,29 +2,24 @@ import pandas as pd
 
 class ProcessingData:
 
-    def __init__(self, df, drop=True, split=True):
-        self.df = df
-        self.sj = None
-        self.iq = None
-        self.ifsplit = split
-        self.ifdrop = drop
-
-    def duplicates_drop(self,drop):
-        self.ifdrop = drop
-        if self.ifdrop:
-            self.df.drop_duplicates(inplace=True)
-            return self.df
-        else:
-            return self.df
+    def duplicates_drop(df):
+        df.drop_duplicates(inplace=True)
 
     # fill missing values
-    def fill_data(self, fillType):
+    def fill_data(df, fillType):
         if fillType == 'ffill':
-            return self.df.fillna(method='ffill', inplace=True)
+            return df.fillna(method='ffill', inplace=True)
         elif fillType == 'fmean':
-            return self.df.fillna(self.df.mean(), inplace=True)
+            return df.fillna(df.mean(), inplace=True)
         else:
-            return self.df.fillna(0, inplace=True)
+            return df.fillna(0, inplace=True)
+
+
+    def drop_outlier(df,df_test, to_trim):
+        for v in to_trim:
+            df.loc[:,v] = [min(x, df_test[v].max()) for x in df[v]]
+            df.loc[:,v] = [max(x, df_test[v].min()) for x in df[v]]
+
 
     def city_split(self, splist):
         self.ifsplit = splist
