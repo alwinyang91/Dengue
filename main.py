@@ -10,6 +10,7 @@ from src.ProcessData import ProcessingData
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 
 # %% Load the data
 df_train, df_test = data_loader()
@@ -27,14 +28,15 @@ to_trim = ['ndvi_ne', 'ndvi_nw',
        'reanalysis_specific_humidity_g_per_kg', 'reanalysis_tdtr_k',
        'station_avg_temp_c', 'station_diur_temp_rng_c', 'station_max_temp_c',
        'station_min_temp_c', 'station_precip_mm']
-ProcessingData.drop_outlier(df_train,df_test, to_trim)
+ProcessingData.drop_outlier(df_train, df_test, to_trim)
 
 
 # %% fed the data
 X = df_train.drop(columns=['total_cases'])
 y = df_train['total_cases']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-# X_test = df_test
+X_train_try, X_test_try, y_train_try, y_test_try = train_test_split(X, y, test_size=0.33, random_state=42)
+
+X_test = df_test
 
 
 # %% Create pipeline
@@ -42,19 +44,23 @@ pipe = make_pipeline(
     ColumnDropperTransformer(["city", "week_start_date"]),
     StandardScaler(),
     SimpleImputer(),
+    # PCA(),
     ModelClass(RandomForestRegressor())
 )
 
+
+
+
 # %% Fit the pipeline
 
-pipe.fit(X_train, y_train)
+pipe.fit(X_train_try, y_train_try)
+pipe.fit(X, y)
 
-
-print(sqrt(mean_squared_error(pipe.predict(X_test), y_test)))
+print(sqrt(mean_squared_error(pipe.predict(X_test_try), y_test_try)))
 
 
 # %% submit
 # to do fill the data
-# ProcessingData.fill_data(X_test, fillType ='ffill')
-# raw_prediction = pipe.predict(X_test)
-# get_data_into_submission_format(raw_prediction)
+ProcessingData.fill_data(X_test, fillType ='ffill')
+raw_prediction = pipe.predict(X_test)
+get_data_into_submission_format(raw_prediction)

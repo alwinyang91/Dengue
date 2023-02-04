@@ -2,7 +2,6 @@
 import pandas as pd
 import numpy as np
 import datetime
-from pathlib import Path  
 
 
 def data_loader():
@@ -22,18 +21,18 @@ def get_data_into_submission_format(prediction: np.array) -> None:
     Args:
         prediction (np.array): THis is an array with the predictions
     """
-    subm = pd.read_csv('./submission/submission_format.csv')
+    subm = pd.read_csv('./submission_format.csv')
 
     labels = pd.DataFrame({'total_cases': pd.Series(prediction)})
     subm.loc[:, 'total_cases'] = labels.astype(int)
+    subm = subm.loc[:,["city", "year", "weekofyear", 'total_cases']]
 
     time = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M")
 
-    
-    filepath = Path(f'submission/submission_{time}.csv', index=False)  
-    filepath.parent.mkdir(parents=True, exist_ok=True)  
-    subm.to_csv(filepath) 
+    subm.to_csv(f'./submission/submission_{time}.csv', index=False)
 
 
-    # subm.to_csv(f'submission_{time}.csv', index=False)
-    # print("Saved!")
+def cyclical_encoding(df, column, max_value):
+    df[column + '_sin'] = np.sin(2 * np.pi * df[column]/max_value)
+    df[column + '_cos'] = np.cos(2 * np.pi * df[column]/max_value)
+    return df
